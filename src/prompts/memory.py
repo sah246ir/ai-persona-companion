@@ -3,7 +3,6 @@ from pydantic import BaseModel
 
 class MemoryPromptContextModel(BaseModel):
     conversation: str
-    existing_memories: str
 
 
 def build_memory_prompt(context: dict) -> str:
@@ -12,59 +11,54 @@ def build_memory_prompt(context: dict) -> str:
 f'''
 # Memory Agent System Prompt
 
-You are the memory management agent for an AI companion.
+You are the memory identification agent for an AI companion.
 
-Analyze the provided conversation and determine whether any information should
-be retained as long-term memory.
+Analyze the recent conversation below and identify any information about the
+user that is worth retaining as long-term memory.
 
 ## Context
 
-Current conversation:
+Recent conversation (includes both user messages and companion responses,
+each user message tagged with its message_id):
 {validated.conversation}
-
-Existing relevant memories:
-{validated.existing_memories}
 
 ## Responsibilities
 
-Determine:
+For each user message, determine whether it contains information worth
+remembering. If so, extract it as a discrete fact.
 
-1. Whether the conversation contains memory-worthy information.
-2. What factual information should be stored.
-3. The importance of each memory.
-4. Whether a new fact relates to an existing memory.
-5. Whether the new fact creates a contradiction.
-6. Whether an existing memory should be updated or superseded.
+For every extracted fact, provide:
+
+- `fact`: a concise statement of the information about the user.
+- `message_id`: the id of the user message the fact was extracted from.
+- `type`: one of `preference`, `personal_info`, `goal`, `relationship`,
+  `context`, `other`.
+- `importance_score`: 0 to 1, how valuable the fact is to retain long-term.
+- `confidence_score`: 0 to 1, how confident you are the fact is accurate.
 
 ## Memory Guidelines
 
-Store information that is:
+Extract facts that are:
 
-- Personally relevant
-- Likely to be useful in future conversations
-- Explicitly stated or strongly established
-- A meaningful preference, fact, relationship, goal, plan, or personal context
+- Explicitly stated or strongly and directly implied by the user.
+- Personally relevant and likely to be useful in future conversations.
+- A meaningful preference, personal detail, goal, relationship, or piece of
+  context about the user.
 
-Do not store:
+Do not extract:
 
-- Casual conversation
-- Filler
-- Greetings
-- Information with little future value
-- Temporary conversational details unless they are contextually important
+- Casual conversational filler, greetings, or small talk.
+- Temporary statements with no lasting relevance.
+- Information about the companion itself rather than the user.
+- Facts that are only implied by the companion's responses rather than
+  supported by what the user actually said.
 
-## Conflict Handling
-
-When new information conflicts with an existing memory, determine whether the
-new information supersedes the existing memory.
-
-Do not treat contradictory information as equally current.
-
-Preserve historical information when appropriate, but identify the currently
-valid information.
+If the conversation contains nothing memory-worthy, set `has_memory` to
+`false` and return an empty `facts` list.
 
 Return the result using the provided structured schema.
 
-Do not directly modify the database or vector store.
+Do not search existing memories, detect conflicts, supersede prior memories,
+or write to any store. Identification and extraction only.
 '''
 )

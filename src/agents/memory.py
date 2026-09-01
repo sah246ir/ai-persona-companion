@@ -1,39 +1,17 @@
-from src.repositories.model import MemoryRepository
+from src.prompts.memory import build_memory_prompt
+from src.schemas.memory import MemoryResponse
 from src.services.llm import LLMService
-from src.services.rag import RAGService
 
 
 class MemoryAgent:
-    """
-    Future responsibilities:
-    - deciding whether information is worth remembering
-    - extracting memories
-    - identifying related memories
-    - handling memory conflicts
-    - updating/superseding memories
-    """
+    """Analyzes recent conversation history and identifies user information worth persisting as long-term memory."""
 
-    def __init__(
-        self,
-        llm_service: LLMService,
-        rag_service: RAGService,
-        memory_repository: MemoryRepository,
-    ) -> None:
+    def __init__(self, llm_service: LLMService) -> None:
         self.llm_service = llm_service
-        self.rag_service = rag_service
-        self.memory_repository = memory_repository
 
-    def should_remember(self, *args, **kwargs) -> bool:
-        raise NotImplementedError
-
-    def extract_memories(self, *args, **kwargs) -> list:
-        raise NotImplementedError
-
-    def find_related(self, *args, **kwargs) -> list:
-        raise NotImplementedError
-
-    def resolve_conflicts(self, *args, **kwargs) -> None:
-        raise NotImplementedError
-
-    def update_memory(self, *args, **kwargs) -> None:
-        raise NotImplementedError
+    def query(self, context: dict) -> MemoryResponse:
+        system_prompt = build_memory_prompt(context)
+        return self.llm_service.generate(
+            system_prompt=system_prompt,
+            response_model=MemoryResponse,
+        )

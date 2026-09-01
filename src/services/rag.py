@@ -34,7 +34,7 @@ class RAGService:
         self,
         texts: list[str],
         input_type: Literal["query", "passage"] = "passage",
-    ) -> list[list[float]]:
+    ) -> list[list[Any]]:
         response = self.client.inference.embed(
             model=self.embedding_model,
             inputs=texts,
