@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Literal
 
 from pinecone import Pinecone
 
@@ -10,6 +10,7 @@ class RAGService:
         settings = get_settings()
         self.client = Pinecone(api_key=settings.PINECONE_API_KEY)
         self.index = self.client.Index(settings.PINECONE_INDEX)
+        self.embedding_model = settings.PINECONE_EMBEDDING_MODEL
 
     def upsert(
         self,
@@ -17,10 +18,26 @@ class RAGService:
         embedding: list[float],
         metadata: dict[str, Any] | None = None,
     ) -> None:
-        raise NotImplementedError
+        self.index.upsert(vectors=[(id, embedding, metadata or {})])
 
     def search(self, embedding: list[float], top_k: int = 5) -> list[dict[str, Any]]:
-        raise NotImplementedError
+        response = self.index.query(vector=embedding, top_k=top_k, include_metadata=True)
+        return [
+            {"id": match.id, "score": match.score, "metadata": match.metadata}
+            for match in response.matches
+        ]
 
     def delete(self, id: str) -> None:
-        raise NotImplementedError
+        self.index.delete(ids=[id])
+
+    def embed(
+        self,
+        texts: list[str],
+        input_type: Literal["query", "passage"] = "passage",
+    ) -> list[list[float]]:
+        response = self.client.inference.embed(
+            model=self.embedding_model,
+            inputs=texts,
+            parameters={"input_type": input_type, "truncate": "END"},
+        )
+        return [item.values for item in response.data]
