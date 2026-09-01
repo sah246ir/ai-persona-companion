@@ -18,4 +18,14 @@ class LLMService:
         response_model: type[BaseModel],
         tools: list[dict[str, Any]] | None = None,
     ) -> BaseModel:
-        raise NotImplementedError
+        kwargs: dict[str, Any] = {}
+        if tools is not None:
+            kwargs["tools"] = tools
+
+        completion = self.client.chat.completions.parse(
+            model=self.model,
+            messages=[{"role": "system", "content": system_prompt}],
+            response_format=response_model,
+            **kwargs,
+        )
+        return completion.choices[0].message.parsed

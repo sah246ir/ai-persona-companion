@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     OPENAI_MODEL: str = "gpt-4o-mini"
     PINECONE_API_KEY: str = ""
     PINECONE_INDEX: str = ""
+    PINECONE_EMBEDDING_MODEL: str = "multilingual-e5-large"
     DATABASE_URL: str = "sqlite:///./app.db"
 
 
