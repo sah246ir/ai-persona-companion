@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class ValidationPromptContext(BaseModel):
+class ValidationPromptContextModel(BaseModel):
     persona: str
     memories: str
     conversation: str
@@ -9,7 +9,7 @@ class ValidationPromptContext(BaseModel):
 
 
 def build_validation_prompt(context: dict) -> str:
-    validated = ValidationPromptContext.model_validate(context)
+    validated = ValidationPromptContextModel.model_validate(context)
     return (
 f'''
 # Validation Agent System Prompt

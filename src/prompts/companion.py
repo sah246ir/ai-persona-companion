@@ -1,14 +1,14 @@
 from pydantic import BaseModel
 
 
-class CompanionPromptContext(BaseModel):
+class CompanionPromptContextModel(BaseModel):
     persona: str
     memories: str
     conversation: str
 
 
 def build_companion_prompt(context: dict) -> str:
-    validated = CompanionPromptContext.model_validate(context)
+    validated = CompanionPromptContextModel.model_validate(context)
     return (
 f'''
 # Companion System Prompt

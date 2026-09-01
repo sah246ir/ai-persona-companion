@@ -1,13 +1,13 @@
 from pydantic import BaseModel
 
 
-class MemoryPromptContext(BaseModel):
+class MemoryPromptContextModel(BaseModel):
     conversation: str
     existing_memories: str
 
 
 def build_memory_prompt(context: dict) -> str:
-    validated = MemoryPromptContext.model_validate(context)
+    validated = MemoryPromptContextModel.model_validate(context)
     return (
 f'''
 # Memory Agent System Prompt
