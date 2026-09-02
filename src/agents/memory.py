@@ -1,10 +1,10 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from src.prompts.memory import build_memory_prompt,MemoryPromptContextModel
-from src.schemas.memory import MemoryRecord, MemoryResponse
-from src.services.llm import LLMService
-from src.services.rag import RAGService
+from prompts.memory import build_memory_prompt,MemoryPromptContextModel
+from schemas.memory import MemoryRecord, MemoryResponse
+from services.llm import LLMService
+from services.rag import RAGService
 
 
 class MemoryAgent:
@@ -47,7 +47,7 @@ class MemoryAgent:
         for record, embedding in zip(records, embeddings):
             self.rag_service.upsert(
                 id=record.memory_id,
-                embedding=[embedding],
+                embedding=embedding,
                 metadata=record.to_metadata(),
             )
 
