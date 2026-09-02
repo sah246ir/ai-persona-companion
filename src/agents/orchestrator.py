@@ -102,6 +102,8 @@ class Orchestrator:
             conversation=format_conversation(chats)
         )
         memoryres = self.memory_agent.query(memorycts)
+
+        self.memory_agent.store(memoryres,self.session)
         # chunk and index memory
         # update superseeding
         return companionres.message

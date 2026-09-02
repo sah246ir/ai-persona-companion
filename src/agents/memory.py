@@ -47,7 +47,7 @@ class MemoryAgent:
         for record, embedding in zip(records, embeddings):
             self.rag_service.upsert(
                 id=record.memory_id,
-                embedding=list(embedding),
+                embedding=[embedding],
                 metadata=record.to_metadata(),
             )
 
