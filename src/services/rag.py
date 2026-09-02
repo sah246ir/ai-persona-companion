@@ -2,7 +2,7 @@ from typing import Any, Literal, Sequence
 
 from pinecone import Pinecone
 
-from src.config import get_settings
+from config import get_settings
 
 
 class RAGService:
@@ -20,9 +20,26 @@ class RAGService:
     ) -> None:
         self.index.upsert(vectors=[(id, embedding, metadata or {})])
 
-    def search(self, q: str, top_k: int = 5) -> list[dict[str, Any]]:
+    def search(
+        self,
+        q: str,
+        top_k: int = 5,
+        session_id: int | None = None,
+        status: str | None = None,
+    ) -> list[dict[str, Any]]:
         embedding = self.embed([q])
-        response = self.index.query(vector=embedding, top_k=top_k, include_metadata=True)
+        filter: dict[str, Any] = {}
+        if session_id is not None:
+            filter["session_id"] = {"$eq": session_id}
+        if status is not None:
+            filter["status"] = {"$eq": status}
+
+        response = self.index.query(
+            vector=embedding[0],
+            top_k=top_k,
+            include_metadata=True,
+            filter=filter or None,
+        )
         return [
             {"id": match.id, "score": match.score, "metadata": match.metadata}
             for match in response.matches
@@ -35,7 +52,7 @@ class RAGService:
         self,
         texts: list[str],
         input_type: Literal["query", "passage"] = "passage",
-    ) -> Sequence[float]:
+    ) -> Sequence[Sequence[float]]:
         response = self.client.inference.embed(
             model=self.embedding_model,
             inputs=texts,
