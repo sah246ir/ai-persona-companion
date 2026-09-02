@@ -7,7 +7,7 @@ class CompanionPromptContextModel(BaseModel):
     conversation: str
 
 
-def build_companion_prompt(context: dict) -> str:
+def build_companion_prompt(context: CompanionPromptContextModel) -> str:
     validated = CompanionPromptContextModel.model_validate(context)
     return (
 f'''
