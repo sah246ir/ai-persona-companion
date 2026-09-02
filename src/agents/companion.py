@@ -1,4 +1,4 @@
-from src.prompts.companion import build_companion_prompt
+from src.prompts.companion import build_companion_prompt,CompanionPromptContextModel
 from src.schemas.companion import CompanionResponse
 from src.services.llm import LLMService
 
@@ -9,7 +9,7 @@ class CompanionAgent:
     def __init__(self, llm_service: LLMService) -> None:
         self.llm_service = llm_service
 
-    def query(self, context: dict) -> CompanionResponse:
+    def query(self, context: CompanionPromptContextModel) -> CompanionResponse:
         system_prompt = build_companion_prompt(context)
         return self.llm_service.generate(
             system_prompt=system_prompt,
