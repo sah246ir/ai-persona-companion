@@ -1,4 +1,4 @@
-from src.prompts.validation import build_validation_prompt
+from src.prompts.validation import build_validation_prompt,ValidationPromptContextModel
 from src.schemas.validation import ValidationResponse
 from src.services.llm import LLMService
 
@@ -9,7 +9,7 @@ class ValidationAgent:
     def __init__(self, llm_service: LLMService) -> None:
         self.llm_service = llm_service
 
-    def query(self, context: dict) -> ValidationResponse:
+    def query(self, context: ValidationPromptContextModel) -> ValidationResponse:
         system_prompt = build_validation_prompt(context)
         return self.llm_service.generate(
             system_prompt=system_prompt,
