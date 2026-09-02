@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     PINECONE_API_KEY: str = ""
     PINECONE_INDEX: str = ""
     PINECONE_EMBEDDING_MODEL: str = "multilingual-e5-large"
+    MEMORY_RESOLUTION_TOP_K: int = 8
+    MEMORY_SIMILARITY_THRESHOLD: float = 0.75
     DATABASE_URL: str = "sqlite:///./app.db"
 
 
