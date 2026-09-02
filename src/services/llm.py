@@ -3,15 +3,18 @@ from typing import Any,TypeVar
 from openai import OpenAI
 from pydantic import BaseModel
 
-from src.config import get_settings
+from config import get_settings
 
 T = TypeVar("T", bound=BaseModel)
 
 class LLMService:
     def __init__(self) -> None:
         settings = get_settings()
-        self.client = OpenAI(api_key=settings.OPENAI_API_KEY)
-        self.model = settings.OPENAI_MODEL
+        self.client = OpenAI(
+            api_key=settings.GROQ_API_KEY,
+            base_url="https://api.groq.com/openai/v1",
+        )
+        self.model = settings.GROQ_MODEL
 
     def generate(
         self,
