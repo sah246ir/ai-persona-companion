@@ -12,3 +12,6 @@ wheels/
 # Environment variables and local database
 .env
 *.db
+
+# Evaluation harness run artifacts
+evaluation_runs/
