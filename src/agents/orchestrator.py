@@ -5,9 +5,12 @@ from src.agents.companion import CompanionAgent
 from src.agents.memory import MemoryAgent
 from src.models.chat import Chat
 from src.prompts.companion import CompanionPromptContextModel
+from src.prompts.memory import MemoryPromptContextModel
+from src.prompts.validation import ValidationPromptContextModel
 from src.repositories.chat import ChatRepository
 from src.services.rag import RAGService
-
+from src.models.chat import ChatSource
+from datetime import datetime
 
 def format_conversation(conversation: list[Chat]) -> str:
     return "\n".join(f"{chat.source}: {chat.message}" for chat in conversation)
@@ -39,22 +42,77 @@ class Orchestrator:
         self.rag = rag
 
     def handle_turn(self, q: str):
-
-        # query companion query
-        ctx = CompanionPromptContextModel(
-            conversation=format_conversation(
-                self.chat_repositor.get_recent_for_session(
+        memories = self.rag.search(q)
+        chats: list[Any] = self.chat_repositor.get_recent_for_session(
                     self.session,
                     10
                 )
+        # query companion query
+        companionctx = CompanionPromptContextModel(
+            conversation=format_conversation(
+                chats
             ),
-            memories=format_memories(self.rag.search(q)),
+            memories=format_memories(memories),
             persona=self.persona
         )
-        self.companion_agent.query(ctx)
+        companionres = self.companion_agent.query(companionctx)
+        chat = self.chat_repositor.create(Chat(
+            message=companionres.message,
+            session_id=self.session,
+            source=ChatSource.agent,
+        ))
+        chats.append(chat)
+        
         # run validation
         # if its wrong loop back to companion w the instructions
+        validationctx = ValidationPromptContextModel(
+            conversation=format_conversation(
+                chats
+            ),
+            memories=format_memories(memories),
+            persona=self.persona,
+            response=companionres.message
+        )
+        validationres = self.validation_agent.query(validationctx)
+        failed = 0
+
+        while not validationres.is_valid:
+            failed = failed+1
+            if failed==4:
+                raise ValueError("validation agent flagged the response multipel times")
+            chat = self.chat_repositor.create(Chat(
+                        message=validationres.description,
+                        session_id=self.session,
+                        source=ChatSource.validator,
+                    ))
+            chats.append(chat)
+            companionctx = CompanionPromptContextModel(
+                conversation=format_conversation(
+                    chats
+                ),
+                memories=format_memories(memories),
+                persona=self.persona
+            )
+            companionres = self.companion_agent.query(companionctx)
+    
+            validationctx = ValidationPromptContextModel(
+                conversation=format_conversation(
+                    self.chat_repositor.get_recent_for_session(
+                        self.session,
+                        10
+                    )
+                ),
+                memories=format_memories(memories),
+                persona=self.persona,
+                response=companionres.message
+            )
+            validationres = self.validation_agent.query(validationctx)
+
         # run memory layer
+        memorycts = MemoryPromptContextModel(
+            conversation=format_conversation(chats)
+        )
+        memoryres = self.memory_agent.query(memorycts)
         # chunk and index memory
         # update superseeding
         return ""  
