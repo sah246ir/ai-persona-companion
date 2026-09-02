@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     PINECONE_EMBEDDING_MODEL: str = "multilingual-e5-large"
     MEMORY_RESOLUTION_TOP_K: int = 8
     MEMORY_SIMILARITY_THRESHOLD: float = 0.75
+    LLM_CALL_DELAY_SECONDS: float = 1.0
     DATABASE_URL: str = "sqlite:///./app.db"
 
 
