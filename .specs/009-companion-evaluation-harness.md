@@ -1,6 +1,6 @@
 # Companion Evaluation Harness
 
-File: `eval/harness.py`
+File: `src/eval/harness.py`
 
 ## Purpose
 
@@ -34,7 +34,7 @@ single manual run — not a production evaluation platform.
 > - Maintain her personality even during technical conversations.
 
 This persona is specific to the harness (a fixture, defined inline in
-`eval/harness.py`) — it is unrelated to the root `persona.txt` used by the
+`src/eval/harness.py`) — it is unrelated to the root `persona.txt` used by the
 interactive `src/main.py` chat.
 
 ## Scenario

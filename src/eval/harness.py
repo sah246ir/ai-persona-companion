@@ -10,7 +10,9 @@ from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+# harness.py lives at src/eval/harness.py; agents/services/etc. are top-level
+# packages under src/, so src/ (not src/eval/) needs to be on the path.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from sqlmodel import Session as DBSession  # noqa: E402
 
@@ -259,7 +261,7 @@ def main() -> None:
             if not report:
                 report = "\n".join(transcript_lines) + "\n\n(run aborted before evaluation completed)\n"
 
-            out_dir = Path(__file__).resolve().parent.parent / "evaluation_runs"
+            out_dir = Path(__file__).resolve().parent.parent.parent / "evaluation_runs"
             out_dir.mkdir(exist_ok=True)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             out_path = out_dir / f"{timestamp}_companion_case.txt"
