@@ -7,6 +7,7 @@ from sqlmodel import Field, SQLModel
 class ChatSource(str, Enum):
     user = "user"
     agent = "agent"
+    validator = "validator"
 
 
 class Chat(SQLModel, table=True):
