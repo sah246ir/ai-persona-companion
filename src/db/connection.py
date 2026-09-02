@@ -2,7 +2,7 @@ from collections.abc import Generator
 
 from sqlmodel import Session, SQLModel, create_engine
 
-from src.config import get_settings
+from config import get_settings
 
 settings = get_settings()
 

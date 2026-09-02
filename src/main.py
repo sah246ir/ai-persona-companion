@@ -3,17 +3,17 @@ from uuid import uuid4
 
 from sqlmodel import Session as DBSession
 
-from src.agents.companion import CompanionAgent
-from src.agents.memory import MemoryAgent
-from src.agents.orchestrator import Orchestrator
-from src.agents.validation import ValidationAgent
-from src.db.connection import engine, init_db
-from src.models.chat import Chat, ChatSource
-from src.models.session import Session
-from src.repositories.chat import ChatRepository
-from src.repositories.session import SessionRepository
-from src.services.llm import LLMService
-from src.services.rag import RAGService
+from agents.companion import CompanionAgent
+from agents.memory import MemoryAgent
+from agents.orchestrator import Orchestrator
+from agents.validation import ValidationAgent
+from db.connection import engine, init_db
+from models.chat import Chat, ChatSource
+from models.session import Session
+from repositories.chat import ChatRepository
+from repositories.session import SessionRepository
+from services.llm import LLMService
+from services.rag import RAGService
 
 
 def main() -> None:

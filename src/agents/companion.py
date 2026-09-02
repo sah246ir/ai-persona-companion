@@ -1,6 +1,6 @@
-from src.prompts.companion import build_companion_prompt,CompanionPromptContextModel
-from src.schemas.companion import CompanionResponse
-from src.services.llm import LLMService
+from prompts.companion import build_companion_prompt,CompanionPromptContextModel
+from schemas.companion import CompanionResponse
+from services.llm import LLMService
 
 
 class CompanionAgent:

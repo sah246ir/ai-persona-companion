@@ -1,6 +1,6 @@
-from src.prompts.validation import build_validation_prompt,ValidationPromptContextModel
-from src.schemas.validation import ValidationResponse
-from src.services.llm import LLMService
+from prompts.validation import build_validation_prompt,ValidationPromptContextModel
+from schemas.validation import ValidationResponse
+from services.llm import LLMService
 
 
 class ValidationAgent:

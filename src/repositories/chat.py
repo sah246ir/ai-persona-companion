@@ -1,6 +1,6 @@
 from sqlmodel import Session as DBSession, select
 
-from src.models.chat import Chat
+from models.chat import Chat
 
 
 class ChatRepository:

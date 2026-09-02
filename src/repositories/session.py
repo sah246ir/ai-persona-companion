@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlmodel import Session as DBSession, select
 
-from src.models.session import Session
+from models.session import Session
 
 
 class SessionRepository:
