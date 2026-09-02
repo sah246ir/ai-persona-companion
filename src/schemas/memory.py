@@ -46,3 +46,14 @@ class MemoryRecord(BaseModel):
         data = self.model_dump(mode="json")
         data["superseded_by"] = data["superseded_by"] or ""
         return data
+
+
+class MemoryRelation(BaseModel):
+    memory_id: str
+    action: Literal["supersede", "update", "ignore"]
+    reasoning: str
+
+
+class ResolutionResponse(BaseModel):
+    new_fact_status: Literal["active", "duplicate", "merged"]
+    relations: list[MemoryRelation]
