@@ -1,16 +1,15 @@
 from typing import Any
 
-from src.agents.validation import ValidationAgent
-from src.agents.companion import CompanionAgent
-from src.agents.memory import MemoryAgent
-from src.models.chat import Chat
-from src.prompts.companion import CompanionPromptContextModel
-from src.prompts.memory import MemoryPromptContextModel
-from src.prompts.validation import ValidationPromptContextModel
-from src.repositories.chat import ChatRepository
-from src.services.rag import RAGService
-from src.models.chat import ChatSource
-from datetime import datetime
+from agents.validation import ValidationAgent
+from agents.companion import CompanionAgent
+from agents.memory import MemoryAgent
+from models.chat import Chat
+from prompts.companion import CompanionPromptContextModel
+from prompts.memory import MemoryPromptContextModel
+from prompts.validation import ValidationPromptContextModel
+from repositories.chat import ChatRepository
+from services.rag import RAGService
+from models.chat import ChatSource
 
 def format_conversation(conversation: list[Chat]) -> str:
     return "\n".join(f"{chat.source}: {chat.message}" for chat in conversation)
@@ -42,53 +41,25 @@ class Orchestrator:
         self.rag = rag
 
     def handle_turn(self, q: str):
-        memories = self.rag.search(q)
+        memories = self.rag.search(q, session_id=self.session, status="active")
         chats = self.chat_repositor.get_recent_for_session(
                     self.session,
                     10
                 )
-        # query companion query
-        companionctx = CompanionPromptContextModel(
-            conversation=format_conversation(chats),
-            memories=format_memories(memories),
-            persona=self.persona
-        )
-        companionres = self.companion_agent.query(companionctx)
-        chat = self.chat_repositor.create(Chat(
-            message=companionres.message,
-            session_id=self.session,
-            source=ChatSource.agent,
-        ))
-        chats.append(chat)
-        
-        # run validation
-        # if its wrong loop back to companion w the instructions
-        validationctx = ValidationPromptContextModel(
-            conversation=format_conversation(chats),
-            memories=format_memories(memories),
-            persona=self.persona,
-            response=companionres.message
-        )
-        validationres = self.validation_agent.query(validationctx)
-        failed = 0
 
-        while not validationres.is_valid:
-            failed = failed+1
-            if failed==4:
-                raise ValueError("validation agent flagged the response multipel times")
-            chat = self.chat_repositor.create(Chat(
-                        message=validationres.description,
-                        session_id=self.session,
-                        source=ChatSource.validator,
-                    ))
-            chats.append(chat)
+        instructions = None
+        attempts = 0
+        max_retries = 3
+
+        while True:
             companionctx = CompanionPromptContextModel(
                 conversation=format_conversation(chats),
                 memories=format_memories(memories),
-                persona=self.persona
+                persona=self.persona,
+                instructions=instructions,
             )
             companionres = self.companion_agent.query(companionctx)
-    
+
             validationctx = ValidationPromptContextModel(
                 conversation=format_conversation(chats),
                 memories=format_memories(memories),
@@ -97,6 +68,21 @@ class Orchestrator:
             )
             validationres = self.validation_agent.query(validationctx)
 
+            if validationres.is_valid:
+                break
+
+            attempts += 1
+            if attempts > max_retries:
+                raise ValueError("validation agent flagged the response multiple times")
+            instructions = validationres.description
+
+        chat = self.chat_repositor.create(Chat(
+            message=companionres.message,
+            session_id=self.session,
+            source=ChatSource.agent,
+        ))
+        chats.append(chat)
+
         # run memory layer
         memorycts = MemoryPromptContextModel(
             conversation=format_conversation(chats)
@@ -104,6 +90,4 @@ class Orchestrator:
         memoryres = self.memory_agent.query(memorycts)
 
         self.memory_agent.store(memoryres,self.session)
-        # chunk and index memory
-        # update superseeding
         return companionres.message
