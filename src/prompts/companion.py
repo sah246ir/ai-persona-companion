@@ -5,10 +5,23 @@ class CompanionPromptContextModel(BaseModel):
     persona: str
     memories: str
     conversation: str
+    instructions: str | None = None
 
 
 def build_companion_prompt(context: CompanionPromptContextModel) -> str:
     validated = CompanionPromptContextModel.model_validate(context)
+    instructions_section = (
+        f'''
+## Regeneration Instructions
+
+Your previous response was rejected. Address the following feedback when
+generating the new response:
+
+{validated.instructions}
+'''
+        if validated.instructions
+        else ""
+    )
     return (
 f'''
 # Companion System Prompt
@@ -40,7 +53,7 @@ Treat memories as contextual information about the user.
 ## Conversation
 
 {validated.conversation}
-
+{instructions_section}
 Respond naturally to the user's latest message while remaining consistent
 with both the persona and relevant user memories.
 '''
