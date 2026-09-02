@@ -43,15 +43,13 @@ class Orchestrator:
 
     def handle_turn(self, q: str):
         memories = self.rag.search(q)
-        chats: list[Any] = self.chat_repositor.get_recent_for_session(
+        chats = self.chat_repositor.get_recent_for_session(
                     self.session,
                     10
                 )
         # query companion query
         companionctx = CompanionPromptContextModel(
-            conversation=format_conversation(
-                chats
-            ),
+            conversation=format_conversation(chats),
             memories=format_memories(memories),
             persona=self.persona
         )
@@ -66,9 +64,7 @@ class Orchestrator:
         # run validation
         # if its wrong loop back to companion w the instructions
         validationctx = ValidationPromptContextModel(
-            conversation=format_conversation(
-                chats
-            ),
+            conversation=format_conversation(chats),
             memories=format_memories(memories),
             persona=self.persona,
             response=companionres.message
@@ -87,21 +83,14 @@ class Orchestrator:
                     ))
             chats.append(chat)
             companionctx = CompanionPromptContextModel(
-                conversation=format_conversation(
-                    chats
-                ),
+                conversation=format_conversation(chats),
                 memories=format_memories(memories),
                 persona=self.persona
             )
             companionres = self.companion_agent.query(companionctx)
     
             validationctx = ValidationPromptContextModel(
-                conversation=format_conversation(
-                    self.chat_repositor.get_recent_for_session(
-                        self.session,
-                        10
-                    )
-                ),
+                conversation=format_conversation(chats),
                 memories=format_memories(memories),
                 persona=self.persona,
                 response=companionres.message
