@@ -29,3 +29,11 @@ class ChatRepository:
             .limit(limit)
         )
         return list(reversed(self.session.exec(statement).all()))
+
+    def delete_for_session(self, session_id: int) -> int:
+        statement = select(Chat).where(Chat.session_id == session_id)
+        chats = self.session.exec(statement).all()
+        for chat in chats:
+            self.session.delete(chat)
+        self.session.commit()
+        return len(chats)

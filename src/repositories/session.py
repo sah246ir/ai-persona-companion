@@ -28,3 +28,7 @@ class SessionRepository:
         self.session.commit()
         self.session.refresh(session)
         return session
+
+    def delete(self, session: Session) -> None:
+        self.session.delete(session)
+        self.session.commit()
