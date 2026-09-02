@@ -28,4 +28,4 @@ class ChatRepository:
             .order_by(Chat.timestamp.desc())
             .limit(limit)
         )
-        return list(self.session.exec(statement).all())
+        return list(reversed(self.session.exec(statement).all()))
