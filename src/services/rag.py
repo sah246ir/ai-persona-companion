@@ -48,6 +48,9 @@ class RAGService:
     def delete(self, id: str) -> None:
         self.index.delete(ids=[id])
 
+    def update_metadata(self, id: str, metadata: dict[str, Any]) -> None:
+        self.index.update(id=id, set_metadata=metadata)
+
     def embed(
         self,
         texts: list[str],
