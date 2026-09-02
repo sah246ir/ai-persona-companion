@@ -1,10 +1,11 @@
-from typing import Any
+from typing import Any,TypeVar
 
 from openai import OpenAI
 from pydantic import BaseModel
 
 from src.config import get_settings
 
+T = TypeVar("T", bound=BaseModel)
 
 class LLMService:
     def __init__(self) -> None:
@@ -15,9 +16,9 @@ class LLMService:
     def generate(
         self,
         system_prompt: str,
-        response_model: type[BaseModel],
+        response_model: type[T],
         tools: list[dict[str, Any]] | None = None,
-    ) -> BaseModel:
+    ) -> T:
         kwargs: dict[str, Any] = {}
         if tools is not None:
             kwargs["tools"] = tools
@@ -28,4 +29,8 @@ class LLMService:
             response_format=response_model,
             **kwargs,
         )
-        return completion.choices[0].message.parsed
+        parsed =  completion.choices[0].message.parsed
+        if parsed is None:
+            raise ValueError("LLM returned no structured response")
+
+        return parsed
