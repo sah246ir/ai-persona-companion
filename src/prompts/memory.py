@@ -5,7 +5,7 @@ class MemoryPromptContextModel(BaseModel):
     conversation: str
 
 
-def build_memory_prompt(context: dict) -> str:
+def build_memory_prompt(context: MemoryPromptContextModel) -> str:
     validated = MemoryPromptContextModel.model_validate(context)
     return (
 f'''

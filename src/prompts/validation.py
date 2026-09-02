@@ -8,7 +8,7 @@ class ValidationPromptContextModel(BaseModel):
     response: str
 
 
-def build_validation_prompt(context: dict) -> str:
+def build_validation_prompt(context: ValidationPromptContextModel) -> str:
     validated = ValidationPromptContextModel.model_validate(context)
     return (
 f'''
