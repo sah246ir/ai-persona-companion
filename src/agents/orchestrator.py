@@ -41,6 +41,7 @@ class Orchestrator:
         self.rag = rag
 
     def handle_turn(self, q: str):
+        print("[orchestrator] searching memories...")
         memories = self.rag.search(q, session_id=self.session, status="active")
         chats = self.chat_repositor.get_recent_for_session(
                     self.session,
@@ -58,6 +59,7 @@ class Orchestrator:
                 persona=self.persona,
                 instructions=instructions,
             )
+            print("[orchestrator] generating response...")
             companionres = self.companion_agent.query(companionctx)
 
             validationctx = ValidationPromptContextModel(
@@ -66,6 +68,7 @@ class Orchestrator:
                 persona=self.persona,
                 response=companionres.message
             )
+            print("[orchestrator] validating response...")
             validationres = self.validation_agent.query(validationctx)
 
             if validationres.is_valid:
@@ -74,8 +77,10 @@ class Orchestrator:
             attempts += 1
             if attempts > max_retries:
                 raise ValueError("validation agent flagged the response multiple times")
+            print(f"[orchestrator] validation failed (attempt {attempts}/{max_retries}), regenerating...")
             instructions = validationres.description
 
+        print("[orchestrator] persisting response...")
         chat = self.chat_repositor.create(Chat(
             message=companionres.message,
             session_id=self.session,
@@ -87,7 +92,9 @@ class Orchestrator:
         memorycts = MemoryPromptContextModel(
             conversation=format_conversation(chats)
         )
+        print("[orchestrator] extracting memories...")
         memoryres = self.memory_agent.query(memorycts)
 
+        print("[orchestrator] storing memories...")
         self.memory_agent.store(memoryres,self.session)
         return companionres.message
