@@ -1,3 +1,4 @@
+import time
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -115,6 +116,8 @@ class MemoryAgent:
 
             if resolution.new_fact_status not in ("duplicate", "merged"):
                 to_persist.append(record)
+
+            time.sleep(settings.LLM_CALL_DELAY_SECONDS)
 
         if to_persist:
             embeddings = self.rag_service.embed(
