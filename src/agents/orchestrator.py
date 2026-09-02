@@ -104,4 +104,4 @@ class Orchestrator:
         memoryres = self.memory_agent.query(memorycts)
         # chunk and index memory
         # update superseeding
-        return ""  
+        return companionres.message
